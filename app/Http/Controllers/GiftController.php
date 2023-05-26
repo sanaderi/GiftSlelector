@@ -2,24 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\GiftSelector;
 use Illuminate\Http\Request;
 use Validator;
+
 class GiftController extends Controller
 {
-    protected $giftList = [
-        [
-            'id' => '1',
-            'title' => 'Gift 1',
-        ],
-        [
-            'id' => '2',
-            'title' => 'Gift 2',
-        ],
-        [
-            'id' => '3',
-            'title' => 'Gift 3',
-        ],
-    ];
 
     /**
      * Display a listing of the gifts.
@@ -28,7 +16,8 @@ class GiftController extends Controller
      */
     public function index()
     {
-        return response()->json($this->giftList);
+        $gifts=new GiftSelector;
+        return response()->json($gifts->getAllGifts());
     }
 
     /**
@@ -60,8 +49,15 @@ class GiftController extends Controller
      */
     public function show($id)
     {
-        $giftCollection=collect($this->giftList);
-        $foundObject = $giftCollection->firstWhere('id', $id);
+        $giftSelector = new GiftSelector();
+        $gift = $giftSelector->getGiftById($id);
+        if ($gift)
+            return $gift;
+        else{
+            return response()->json(['error' => 'Gift not found'], 404);
+        }
+
+
         return $foundObject;
 
     }
@@ -86,9 +82,14 @@ class GiftController extends Controller
 
         // Validation passed, proceed with the update logic
 
-        $giftCollection=collect($this->giftList);
-        $foundObject = $giftCollection->firstWhere('id', $request->id);
-        return $foundObject;
+        $giftSelector = new GiftSelector();
+        $gift = $giftSelector->getGiftById($request->id);
+        if ($gift)
+            return $gift;
+        else{
+            return response()->json(['error' => 'Gift not found'], Response::HTTP_NOT_FOUND);
+        }
+
 
     }
 
